@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.join(__dir__, "..", "lib"))
+
+require "daily_tech_news"
+
+# TODO: implement orchestration (Phase 6)
+DailyTechNews.logger.info "daily-tech-news: not yet implemented"

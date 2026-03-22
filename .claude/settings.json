@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export PATH=\"$HOME/.local/share/mise/shims:$PATH\"; cd /Users/frkawa/dev/daily-tech-news && changed=$(git diff --name-only HEAD 2>/dev/null | grep '\\.rb$'); [ -n \"$changed\" ] && bundle exec rubocop --no-color $changed 2>&1 | tail -10 || true"
+          }
+        ]
+      }
+    ]
+  }
+}
