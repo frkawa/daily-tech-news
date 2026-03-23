@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require 'webmock/rspec'
+require 'tmpdir'
+require 'fileutils'
+require 'json'
 
 $LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
 require 'daily_tech_news'
+
+Dir[File.join(__dir__, 'support', '**', '*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

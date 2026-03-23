@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Zenn - Ruby</title>
+    <link>https://zenn.dev/topics/ruby</link>
+    <item>
+      <title>Zenn記事: Ruby入門</title>
+      <link>https://zenn.dev/example/articles/ruby-intro</link>
+      <description>&lt;p&gt;Ruby の基礎を学ぶ記事です。&lt;/p&gt;</description>
+      <pubDate>Wed, 20 Mar 2026 10:00:00 +0900</pubDate>
+    </item>
+    <item>
+      <title>Zenn記事: RSpecのすすめ</title>
+      <link>https://zenn.dev/example/articles/rspec-guide</link>
+      <description>&lt;p&gt;RSpec でテストを書く方法を解説します。&lt;/p&gt;</description>
+      <pubDate>Tue, 19 Mar 2026 09:00:00 +0900</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,16 @@
+[
+  {
+    "url": "https://qiita.com/example/items/abc123",
+    "title": "Ruby 3.4 の新機能まとめ",
+    "body": "Ruby 3.4 では Data.define が安定化されました。",
+    "created_at": "2026-03-20T10:00:00+09:00",
+    "tags": [{"name": "Ruby"}, {"name": "Rails"}]
+  },
+  {
+    "url": "https://qiita.com/example/items/def456",
+    "title": "Rails 8 リリースノート",
+    "body": "Rails 8 では Solid Queue がデフォルトになりました。",
+    "created_at": "2026-03-19T09:00:00+09:00",
+    "tags": [{"name": "Rails"}]
+  }
+]
