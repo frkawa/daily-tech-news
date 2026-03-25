@@ -3,7 +3,7 @@
 module DailyTechNews
   module Sources
     class Qiita < Base
-      TAGS = %w[Ruby Rails].freeze
+      TAGS = %w[Ruby Rails AI].freeze
       API_URL = 'https://qiita.com/api/v2/items'
       PER_PAGE = 20
       BODY_LIMIT = 1500

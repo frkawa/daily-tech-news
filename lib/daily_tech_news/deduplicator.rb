@@ -4,7 +4,7 @@ require 'digest'
 
 module DailyTechNews
   class Deduplicator
-    def initialize(path)
+    def initialize(path = '.seen_urls')
       @path = path
       @seen = Set.new
     end

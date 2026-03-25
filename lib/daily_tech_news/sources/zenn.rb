@@ -5,14 +5,24 @@ require 'nokogiri'
 module DailyTechNews
   module Sources
     class Zenn < Base
-      FEED_URL = 'https://zenn.dev/topics/ruby/feed'
+      TOPICS = %w[ruby rails ai claude].freeze
+      FEED_URL = 'https://zenn.dev/topics/%<topic>s/feed'
       BODY_LIMIT = 1500
 
       private
 
       def fetch_articles
-        response = @http.get(FEED_URL)
+        articles = TOPICS.flat_map { |topic| fetch_topic(topic) }
+        articles.uniq(&:url)
+      end
+
+      def fetch_topic(topic)
+        url = format(FEED_URL, topic: topic)
+        response = @http.get(url)
         parse_feed(response.body)
+      rescue StandardError => e
+        DailyTechNews.logger.warn("Zenn topic #{topic} failed: #{e.message}")
+        []
       end
 
       def parse_feed(xml)
