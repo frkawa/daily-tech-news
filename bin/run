@@ -1,9 +1,65 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift(File.join(__dir__, "..", "lib"))
+$LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
+require 'daily_tech_news'
 
-require "daily_tech_news"
+begin
+  DailyTechNews::Config.validate!
 
-# TODO: implement orchestration (Phase 6)
-DailyTechNews.logger.info "daily-tech-news: not yet implemented"
+  deduplicator = DailyTechNews::Deduplicator.new
+  deduplicator.load
+
+  sources = [
+    DailyTechNews::Sources::Qiita.new(deduplicator: deduplicator),
+    DailyTechNews::Sources::Zenn.new(deduplicator: deduplicator),
+    DailyTechNews::Sources::HackerNews.new(deduplicator: deduplicator),
+    DailyTechNews::Sources::AnthropicBlog.new(deduplicator: deduplicator)
+  ]
+
+  articles = sources.flat_map(&:fetch)
+
+  if articles.empty?
+    DailyTechNews.logger.warn('No new articles found. Exiting.')
+    exit 0
+  end
+
+  DailyTechNews.logger.info("Fetched #{articles.length} new articles.")
+  articles.each { |a| deduplicator.mark_seen(a.url) }
+
+  claude = DailyTechNews::ClaudeClient.new
+  highlight_article = claude.select_top_article(articles)
+
+  japanese_sources = %w[hacker_news anthropic_blog]
+  summarized = articles.map do |article|
+    claude.summarize(article, japanese: japanese_sources.include?(article.source))
+  end
+
+  highlight = summarized.find { |s| s.article == highlight_article } || summarized.first
+
+  sections = summarized.group_by { |s| s.article.source }
+
+  date = Date.today
+  content = DailyTechNews::MarkdownRenderer.new.render(date: date, highlight: highlight, sections: sections)
+  file_path = DailyTechNews::FileWriter.new.write(date: date, content: content)
+
+  DailyTechNews.logger.info("Written: #{file_path}")
+
+  DailyTechNews::GitPublisher.new.publish(file_path)
+
+  deduplicator.persist!
+
+  DailyTechNews::LineNotifier.new.notify("#{date} の技術ニュースを配信しました: #{file_path}")
+
+  DailyTechNews.logger.info('Done.')
+rescue DailyTechNews::ConfigError => e
+  DailyTechNews.logger.error("Configuration error: #{e.message}")
+  exit 1
+rescue DailyTechNews::GitPublishError => e
+  DailyTechNews.logger.error("Git publish failed: #{e.message}")
+  exit 1
+rescue StandardError => e
+  DailyTechNews.logger.error("Unexpected error: #{e.message}")
+  DailyTechNews.logger.error(e.backtrace.first(5).join("\n"))
+  exit 1
+end
