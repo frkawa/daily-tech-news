@@ -1,0 +1,13 @@
+{
+  "id": "msg_01",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"selected_index\": 1, \"reason\": \"Claude 4のリリースはRubyistを含む全開発者に直接影響する最重要ニュースです\"}"
+    }
+  ],
+  "model": "claude-haiku-3-20240307",
+  "stop_reason": "end_turn"
+}

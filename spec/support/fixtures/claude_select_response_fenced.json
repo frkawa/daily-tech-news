@@ -1,0 +1,13 @@
+{
+  "id": "msg_02",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "```json\n{\"selected_index\": 0, \"reason\": \"フェンス付きレスポンスのテスト\"}\n```"
+    }
+  ],
+  "model": "claude-haiku-3-20240307",
+  "stop_reason": "end_turn"
+}

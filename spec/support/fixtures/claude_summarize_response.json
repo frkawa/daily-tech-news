@@ -1,0 +1,13 @@
+{
+  "id": "msg_03",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"bullets\": [\"Ruby 3.4でパターンマッチングが大幅に改善された\", \"Dataクラスの定義がよりシンプルになった\", \"パフォーマンスが最大15%向上した\"], \"importance\": 4, \"ruby_impact\": \"既存コードへの影響は少なく、新機能を段階的に導入できる\"}"
+    }
+  ],
+  "model": "claude-haiku-3-20240307",
+  "stop_reason": "end_turn"
+}
