@@ -8,7 +8,7 @@ module DailyTechNews
 
   class ClaudeClient
     API_URL = 'https://api.anthropic.com/v1/messages'
-    MODEL = 'claude-haiku-3-20240307'
+    MODEL = 'claude-haiku-4-5-20251001'
     MAX_TOKENS = 1024
     ANTHROPIC_VERSION = '2023-06-01'
     HIGHLIGHT_BODY_LIMIT = 200
