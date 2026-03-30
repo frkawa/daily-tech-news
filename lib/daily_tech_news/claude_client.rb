@@ -37,28 +37,27 @@ module DailyTechNews
 
       prompt = <<~PROMPT
         #{lang}以下の技術記事を要約してください。
+        必ずJSON形式のみで出力し、説明文・マークダウン・前置きは一切含めないでください。
 
         タイトル: #{article.title}
         本文（先頭1500字）:
         #{article.body}
 
-        以下のJSON形式のみで返答してください:
-        {
-          "bullets": ["要点1", "要点2", "要点3"],
-          "importance": 3,
-          "ruby_impact": "Rubyistへの影響を1文で"
-        }
+        出力形式（このJSONのみ返答すること）:
+        {"bullets":["要点1","要点2","要点3"],"importance":3,"ruby_impact":"Rubyistへの影響を1文で"}
 
-        importance は 1〜5 の整数（5が最重要）。
-        bullets は各30〜60字程度の箇条書き3行。
+        ルール:
+        - importance は 1〜5 の整数（5が最重要）
+        - bullets は各30〜60字程度の箇条書き3行
+        - JSON以外の文字を出力してはいけない
       PROMPT
 
       data = parse_json_response(call_api(prompt))
       SummarizedArticle.new(
         article: article,
-        bullets: data['bullets'],
-        importance: data['importance'],
-        ruby_impact: data['ruby_impact']
+        bullets: Array(data['bullets']),
+        importance: data['importance'].to_i.clamp(1, 5),
+        ruby_impact: data['ruby_impact'].to_s
       )
     end
 
@@ -78,7 +77,7 @@ module DailyTechNews
           messages: [{ role: 'user', content: prompt }]
         }.to_json
       )
-      raise ClaudeApiError, "API error: #{response.code}" unless response.success?
+      raise ClaudeApiError, "API error: #{response.code} - #{response.body}" unless response.success?
 
       response.dig('content', 0, 'text')
     end
@@ -89,6 +88,8 @@ module DailyTechNews
                  .gsub(/\n?```\s*\z/, '')
                  .strip
       JSON.parse(stripped)
+    rescue JSON::ParserError => e
+      raise ClaudeApiError, "JSON parse error: #{e.message} (response: #{text.slice(0, 200)})"
     end
   end
 end

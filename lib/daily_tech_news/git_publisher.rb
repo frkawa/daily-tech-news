@@ -12,12 +12,20 @@ module DailyTechNews
     def publish(file_path)
       run!('git', 'config', 'user.name', GIT_AUTHOR_NAME)
       run!('git', 'config', 'user.email', GIT_AUTHOR_EMAIL)
-      run!('git', 'add', file_path, '.seen_urls')
+      run!('git', 'add', file_path)
 
       return DailyTechNews.logger.info('No changes to commit, skipping.') if nothing_staged?
 
       date = Date.today.to_s
       run!('git', 'commit', '-m', "news: #{date}")
+      push!
+    end
+
+    def publish_seen_urls
+      run!('git', 'add', '.seen_urls')
+      return if nothing_staged?
+
+      run!('git', 'commit', '-m', 'chore: update seen_urls')
       push!
     end
 
