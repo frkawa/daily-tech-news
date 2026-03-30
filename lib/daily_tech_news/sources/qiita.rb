@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'time'
+
 module DailyTechNews
   module Sources
     class Qiita < Base
@@ -7,6 +9,7 @@ module DailyTechNews
       API_URL = 'https://qiita.com/api/v2/items'
       PER_PAGE = 20
       BODY_LIMIT = 1500
+      MIN_LIKES = 5
 
       private
 
@@ -17,8 +20,11 @@ module DailyTechNews
 
       def fetch_by_tag(tag)
         headers = build_headers
-        response = @http.get(API_URL, headers: headers, query: { tag: tag, per_page: PER_PAGE })
-        JSON.parse(response.body).map { |item| build_article(item) }
+        since = (Time.now - 60 * 60 * 24 * 7).strftime('%Y-%m-%d')
+        response = @http.get(API_URL, headers: headers, query: { query: "tag:#{tag} created:>#{since} sort:like", per_page: PER_PAGE })
+        JSON.parse(response.body)
+            .select { |item| item['likes_count'].to_i >= MIN_LIKES }
+            .map { |item| build_article(item) }
       end
 
       def build_headers
