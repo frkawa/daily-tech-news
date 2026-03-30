@@ -13,11 +13,13 @@ begin
   sources = [
     DailyTechNews::Sources::Qiita.new(deduplicator: deduplicator),
     DailyTechNews::Sources::Zenn.new(deduplicator: deduplicator),
-    DailyTechNews::Sources::HackerNews.new(deduplicator: deduplicator),
-    DailyTechNews::Sources::AnthropicBlog.new(deduplicator: deduplicator)
+    DailyTechNews::Sources::HackerNews.new(deduplicator: deduplicator)
   ]
 
   articles = sources.flat_map(&:fetch)
+
+  cutoff = Time.now - 60 * 60 * 24 * 7
+  articles = articles.select { |a| a.published_at >= cutoff }
 
   if articles.empty?
     DailyTechNews.logger.warn('No new articles found. Exiting.')
@@ -30,9 +32,12 @@ begin
   claude = DailyTechNews::ClaudeClient.new
   highlight_article = claude.select_top_article(articles)
 
-  japanese_sources = %w[hacker_news anthropic_blog]
-  summarized = articles.map do |article|
+  japanese_sources = %w[hacker_news]
+  summarized = articles.filter_map do |article|
     claude.summarize(article, japanese: japanese_sources.include?(article.source))
+  rescue DailyTechNews::ClaudeApiError => e
+    DailyTechNews.logger.warn("Skipping article (summarize failed): #{article.url} - #{e.message}")
+    nil
   end
 
   highlight = summarized.find { |s| s.article == highlight_article } || summarized.first
@@ -45,11 +50,15 @@ begin
 
   DailyTechNews.logger.info("Written: #{file_path}")
 
-  DailyTechNews::GitPublisher.new.publish(file_path)
+  git_publisher = DailyTechNews::GitPublisher.new
+  git_publisher.publish(file_path)
 
   deduplicator.persist!
+  git_publisher.publish_seen_urls
 
-  DailyTechNews::LineNotifier.new.notify("#{date} の技術ニュースを配信しました: #{file_path}")
+  repo = ENV['GITHUB_REPOSITORY']
+  news_url = repo ? "https://github.com/#{repo}/blob/master/#{file_path}" : file_path
+  DailyTechNews::LineNotifier.new.notify("#{date} の技術ニュースを配信しました\n#{news_url}")
 
   DailyTechNews.logger.info('Done.')
 rescue DailyTechNews::ConfigError => e
