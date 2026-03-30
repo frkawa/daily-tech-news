@@ -2,4 +2,5 @@
 vendor/bundle/
 .env
 .env.*
+.envrc
 *.log
